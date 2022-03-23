@@ -5,6 +5,5 @@ More info to come.
 
 ## License
 
-Made avaliable to the public under the Apache 2.0 License, or later revision.
-
-Certain files include additional licensing options for their content, such as the MIT-derived files in the nvm-sdf crate.
+Made avaliable to the public under the MIT License, see Notice file for other licenses and
+LICENSE for the full text of the license.

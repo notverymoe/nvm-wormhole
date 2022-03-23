@@ -1,0 +1,12 @@
+[package]
+name = "nvm-wormhole"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glam = "0.20.2"
+image = "0.24.1"
+pixels = "0.9.0"
+winit = "0.26.1"
+# nvm-sdf = { path = "../nvm-sdf" }
+winit_input_helper = "0.11.1"

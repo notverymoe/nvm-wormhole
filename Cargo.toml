@@ -1,0 +1,29 @@
+[workspace]
+resolver="2"
+members=[
+    "crates/*"
+]
+exclude=[
+    "old/*",
+    "crates/shim-nvm-sdf-gpu",
+]
+
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+strip = "symbols"
+
+[profile.dev]
+opt-level = 1
+strip = "none"
+incremental = true
+debug-assertions = true
+overflow-checks = true
+
+[profile.dev.package."*"]
+opt-level = 3
+strip = "none"
+incremental = true
+debug-assertions = true
+overflow-checks = true

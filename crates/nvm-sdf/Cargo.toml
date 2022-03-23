@@ -1,0 +1,12 @@
+[package]
+name = "nvm-sdf"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["std"]
+std = ["glam/std"]
+libm = ["glam/libm"]
+
+[dependencies]
+glam = { version = "0.20.2", default-features = false, features=[] }
