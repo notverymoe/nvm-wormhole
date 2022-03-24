@@ -5,8 +5,10 @@ edition = "2021"
 
 [features]
 default = ["std"]
-std = ["glam/std"]
+std = ["glam/std", "num-traits/std"]
 libm = ["glam/libm"]
 
 [dependencies]
 glam = { version = "0.20.2", default-features = false, features=[] }
+num-traits = { version = "0.2", default-features = false, features=[] }
+num-derive = { version = "0.3", default-features = false, features=[] }
