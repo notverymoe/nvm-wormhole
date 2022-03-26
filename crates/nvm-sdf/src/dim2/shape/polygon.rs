@@ -70,7 +70,7 @@ pub fn polygon_n(p: Vec2, r: f32, n: f32) -> f32 {
     p.length()*p.x.sin()
 }
 
-pub fn star_n(p: Vec2, r: f32, n: f32, m: f32) -> f32 {
+pub fn polystar_n(p: Vec2, r: f32, n: f32, m: f32) -> f32 {
     let an  = core::f32::consts::PI/n;
     let en  = core::f32::consts::PI/m;  // m is between 2 and n
     let acs = angle_to_vec(an);
@@ -85,7 +85,7 @@ pub fn star_n(p: Vec2, r: f32, n: f32, m: f32) -> f32 {
 }
 
 
-pub fn poly_hull(p: Vec2, v: &[Vec2]) -> f32 {
+pub fn polygon_hull(p: Vec2, v: &[Vec2]) -> f32 {
     let mut d = (p-v[0]).length_squared();
     let mut s = 1.0;
     let mut j = v.len() - 1;

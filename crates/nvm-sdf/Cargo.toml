@@ -9,6 +9,7 @@ std = ["glam/std", "num-traits/std"]
 libm = ["glam/libm"]
 
 [dependencies]
-glam = { version = "0.20.2", default-features = false, features=[] }
+glam = { version = "0.20.2", default-features = false, features=["bytemuck"] }
 num-traits = { version = "0.2", default-features = false, features=[] }
 num-derive = { version = "0.3", default-features = false, features=[] }
+bytemuck = "1.8.0"

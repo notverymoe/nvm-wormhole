@@ -520,6 +520,7 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4fa84eead97d5412b2a20aed4d66612a97a9e41e08eababdb9ae2bf88667490"
 dependencies = [
+ "bytemuck",
  "num-traits",
 ]
 
@@ -967,6 +968,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-derive"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1043,7 +1055,10 @@ dependencies = [
 name = "nvm-sdf"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
  "glam",
+ "num-derive",
+ "num-traits",
 ]
 
 [[package]]
