@@ -2,6 +2,9 @@
 ** NotVeryMoe DSF | Copyright 2021 NotVeryMoe (projects@notvery.moe) **
 \*===================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
+
 pub mod shape;
 pub mod transform;
 pub mod operation;

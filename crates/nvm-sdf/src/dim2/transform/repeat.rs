@@ -2,6 +2,8 @@
 ** NotVeryMoe DSF | Copyright 2021 NotVeryMoe (projects@notvery.moe) **
 \*===================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
 use glam::{Vec2, vec2};
 
 pub fn repeat_axis(p: Vec2, b: Vec2, l: f32, n: f32) -> Vec2 {

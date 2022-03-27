@@ -1,4 +1,4 @@
-use spirv_builder::{SpirvBuilder, ModuleResult, SpirvBuilderError, MetadataPrintout};
+use spirv_builder::{SpirvBuilder, ModuleResult, SpirvBuilderError, MetadataPrintout, Capability};
 
 fn main() -> Result<(), SpirvBuilderError> {
     std::fs::create_dir_all("./output/").unwrap();
@@ -17,6 +17,10 @@ fn compile_shader(name: &str) -> Result<(), SpirvBuilderError> {
             format!("{}/shaders/{}", env!("CARGO_MANIFEST_DIR"), name), 
             "spirv-unknown-spv1.3"
         )
+        .multimodule(true)
+        .capability(Capability::Int8)
+        .capability(Capability::Int16)
+        .capability(Capability::Int64)
         .print_metadata(MetadataPrintout::DependencyOnly)
         .build()?;
 

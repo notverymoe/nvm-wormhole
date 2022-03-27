@@ -1,13 +1,13 @@
-use bytemuck::cast_slice;
 use glam::{Vec2, vec2, vec4};
 
-use num_traits::FromPrimitive;
+#[allow(unused_imports)]
+use num_traits::{Float, FromPrimitive};
 use num_derive::FromPrimitive;
 
 use super::{operation, transform, shape};
 
 #[repr(u32)]
-#[derive(FromPrimitive)]
+#[derive(FromPrimitive, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TreeNodeKind {
 
     TransformAffineTranslate,
@@ -67,60 +67,115 @@ pub enum TreeNodeKind {
     OperationBooleanInterpolate,
 }
 
-pub fn evaluate_tree(tree: &[u32], start: u32, mut point: Vec2) -> f32 {
-    let mut result = core::f32::INFINITY;
-    for i in (start as usize..tree.len()).step_by(8) {
-        let f: &[f32; 6] = cast_slice(&tree[i..i+6]).try_into().unwrap();
-        let u: &[u32; 6] = &tree[i..i+6].try_into().unwrap();
-        match TreeNodeKind::from_u32(tree[i+7]) {
-            Some(TreeNodeKind::TransformAffineTranslate   ) => point  = transform::translate(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::TransformAffineRotate      ) => point  = transform::rotate(point, f[0]),
-            Some(TreeNodeKind::TransformAffineRotateDirect) => point  = transform::rotate_direct(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::TransformMirrorAxis        ) => point  = transform::mirror_axis(point, vec2(f[0], f[1]), f[2]),
-            Some(TreeNodeKind::TransformMirrorBox         ) => point  = transform::mirror_box(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::TransformMirrorCircle      ) => point  = transform::mirror_circle(point, f[0]),
-            Some(TreeNodeKind::TransformRepeatAxis        ) => point  = transform::mirror_axis(point, vec2(f[0], f[1]), f[2]),
-            Some(TreeNodeKind::TransformRepeatBox         ) => point  = transform::mirror_box(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::TransformRepeatCircle      ) => point  = transform::mirror_circle(point, f[0]),
-            Some(TreeNodeKind::ShapeCircle                ) => result = shape::circle(point, f[0]),
-            Some(TreeNodeKind::ShapeCircleSlice           ) => result = shape::circle_slice(point, vec2(f[0], f[1]), f[2]),
-            Some(TreeNodeKind::ShapeCircleCut             ) => result = shape::circle_cut(point, f[0], f[1]),
-            Some(TreeNodeKind::ShapeCircleArc             ) => result = shape::circle_arc(point, vec2(f[0], f[1]), f[2], f[3]),
-            Some(TreeNodeKind::ShapeCircleHorseshoe       ) => result = shape::circle_horseshoe(point, vec2(f[0], f[1]), f[2], vec2(f[3], f[4])),
-            Some(TreeNodeKind::ShapeEllipse               ) => result = shape::ellipse(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::ShapeCircleSweep           ) => result = shape::circle_sweep(point, f[0], f[1]),
-            Some(TreeNodeKind::ShapeCircleSweepUneven     ) => result = shape::circle_sweep_uneven(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapeSquare                ) => result = shape::square(point, f[0]),
-            Some(TreeNodeKind::ShapeRectangle             ) => result = shape::rectangle(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::ShapeRectangleOriented     ) => result = shape::rectangle_oriented(point, vec2(f[0], f[1]), f[2]),
-            Some(TreeNodeKind::ShapeRectangleRounded      ) => result = shape::rectangle_rounded(point, vec2(f[0], f[1]), f[2]),
-            Some(TreeNodeKind::ShapeRectangleRounded4     ) => result = shape::rectangle_rounded_4(point, vec2(f[0], f[1]), vec4(f[2], f[3], f[4], f[5])),
-            Some(TreeNodeKind::ShapeRhombus               ) => result = shape::rhombus(point, vec2(f[0], f[1])),
-            Some(TreeNodeKind::ShapeTrapezoidIso          ) => result = shape::trapezoid_iso(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapeParallelogram         ) => result = shape::parallelogram(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapeTriangle              ) => result = shape::triangle(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapeTrianglePnt           ) => result = shape::triangle_pnt(point, vec2(f[0], f[1]), vec2(f[2], f[3]), vec2(f[4], f[5])),
-            Some(TreeNodeKind::ShapeTriangleIsosceles     ) => result = shape::trapezoid_iso(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapeTriangleEquilateral   ) => result = shape::triangle_equilateral(point, f[0]),
-            Some(TreeNodeKind::ShapeLineSegmentThick      ) => result = shape::line_segment_thick(point, vec2(f[0], f[1]), vec2(f[2], f[3]), f[4]),
-            Some(TreeNodeKind::ShapeLineSegmentThin       ) => result = shape::line_segment_thin(point, vec2(f[0], f[1]), vec2(f[2], f[3])),
-            Some(TreeNodeKind::ShapeParabola              ) => result = shape::parabola(point, f[0]),
-            Some(TreeNodeKind::ShapeParabolaSegment       ) => result = shape::parabola_segment(point, f[0], f[1]),
-            Some(TreeNodeKind::ShapeBezierSegment         ) => result = shape::bezier_segment(point, vec2(f[0], f[1]), vec2(f[2], f[3]), vec2(f[4], f[5])),
-            Some(TreeNodeKind::ShapePentagon              ) => result = shape::pentagon(point, f[0]),
-            Some(TreeNodeKind::ShapeHexagon               ) => result = shape::hexagon(point, f[0]),
-            Some(TreeNodeKind::ShapeOctogon               ) => result = shape::octogon(point, f[0]),
-            Some(TreeNodeKind::ShapePolygonN              ) => result = shape::polygon_n(point, f[0], f[1]),
-            Some(TreeNodeKind::ShapeStarN                 ) => result = shape::polystar_n(point, f[0], f[1], f[2]),
-            Some(TreeNodeKind::ShapePolygonHull           ) => result = { let (from, len) = (u[0] as usize, u[1] as usize); shape::polygon_hull(point, cast_slice(&tree[from..(from+len)])) },
-            Some(TreeNodeKind::OperationUnaryNegate       ) => result = operation::unary_negate(result),
-            Some(TreeNodeKind::OperationUnaryOffset       ) => result = operation::unary_offset(result, f[0]),
-            Some(TreeNodeKind::OperationBooleanUnion      ) => result = operation::boolean_union(result, evaluate_tree(tree, u[0], point)),
-            Some(TreeNodeKind::OperationBooleanIntersect  ) => result = operation::boolean_intersect(result, evaluate_tree(tree, u[0], point)),
-            Some(TreeNodeKind::OperationBooleanDifference ) => result = operation::boolean_difference(result, evaluate_tree(tree, u[0], point)),
-            Some(TreeNodeKind::OperationBooleanInterpolate) => result = operation::boolean_interpolate(result, evaluate_tree(tree, u[0], point), f[1]),
-            None                                            => unreachable!(),
+macro_rules! get_f {
+    ($a:ident, $i:expr, $j:expr) => {
+        f32::from_bits($a[$i+$j])
+    };
+}
+
+macro_rules! get_v2 {
+    ($a:ident, $i:expr, $j:expr) => {
+        vec2(f32::from_bits($a[$i+$j]), f32::from_bits($a[$i+$j+1]))
+    };
+}
+
+pub fn evaluate_tree<const MAX_DEPTH: usize>(
+    tree:  &[u32], 
+    point_buf: &[Vec2], 
+    start:  usize, 
+    len:    usize,
+    point:  Vec2
+) -> f32 {
+
+    let mut depth = 0;
+
+    let mut index:  [usize; MAX_DEPTH]        = [0; MAX_DEPTH];
+    let mut ends:   [usize; MAX_DEPTH]        = [0; MAX_DEPTH];
+    let mut sample: [ f32;  MAX_DEPTH]        = [core::f32::INFINITY; MAX_DEPTH];
+    let mut points: [Vec2;  MAX_DEPTH]        = [vec2(0.0,0.0); MAX_DEPTH];
+    let mut ops:    [TreeNodeKind; MAX_DEPTH] = [TreeNodeKind::OperationBooleanUnion; MAX_DEPTH];
+
+    index[0]  = start;
+    ends[0]   = start + len*8;
+    points[0] = point;
+
+
+    loop {
+        let i = index[depth];
+        match TreeNodeKind::from_u32(tree[index[depth]]) {
+            Some(TreeNodeKind::TransformAffineTranslate       ) => points[depth] = transform::translate(points[depth], get_v2!(tree, i, 0)),
+            Some(TreeNodeKind::TransformAffineRotate          ) => points[depth] = transform::rotate(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::TransformAffineRotateDirect    ) => points[depth] = transform::rotate_direct(points[depth], get_v2!(tree, i, 0)),
+            Some(TreeNodeKind::TransformMirrorAxis            ) => points[depth] = transform::mirror_axis(points[depth], get_v2!(tree, i, 0), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::TransformMirrorBox             ) => points[depth] = transform::mirror_box(points[depth], get_v2!(tree, i, 0)),
+            Some(TreeNodeKind::TransformMirrorCircle          ) => points[depth] = transform::mirror_circle(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::TransformRepeatAxis            ) => points[depth] = transform::mirror_axis(points[depth], get_v2!(tree, i, 0), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::TransformRepeatBox             ) => points[depth] = transform::mirror_box(points[depth], get_v2!(tree, i, 0)),
+            Some(TreeNodeKind::TransformRepeatCircle          ) => points[depth] = transform::mirror_circle(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeCircle                    ) => sample[depth] = shape::circle(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeCircleSlice               ) => sample[depth] = shape::circle_slice(points[depth], get_v2!(tree, i,  0), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeCircleCut                 ) => sample[depth] = shape::circle_cut(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1)),
+            Some(TreeNodeKind::ShapeCircleArc                 ) => sample[depth] = shape::circle_arc(points[depth], get_v2!(tree, i,  0), get_f!(tree, i, 2), get_f!(tree, i, 3)),
+            Some(TreeNodeKind::ShapeCircleHorseshoe           ) => sample[depth] = shape::circle_horseshoe(points[depth], get_v2!(tree, i,  0), get_f!(tree, i, 2), get_v2!(tree, i,  3)),
+            Some(TreeNodeKind::ShapeEllipse                   ) => sample[depth] = shape::ellipse(points[depth], get_v2!(tree, i,  0)),
+            Some(TreeNodeKind::ShapeCircleSweep               ) => sample[depth] = shape::circle_sweep(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1)),
+            Some(TreeNodeKind::ShapeCircleSweepUneven         ) => sample[depth] = shape::circle_sweep_uneven(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeSquare                    ) => sample[depth] = shape::square(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeRectangle                 ) => sample[depth] = shape::rectangle(points[depth], get_v2!(tree, i,  0)),
+            Some(TreeNodeKind::ShapeRectangleOriented         ) => sample[depth] = shape::rectangle_oriented(points[depth], get_v2!(tree, i,  0), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeRectangleRounded          ) => sample[depth] = shape::rectangle_rounded(points[depth], get_v2!(tree, i,  0), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeRectangleRounded4         ) => sample[depth] = shape::rectangle_rounded_4(points[depth], get_v2!(tree, i,  0), vec4(get_f!(tree, i, 2), get_f!(tree, i, 3), get_f!(tree, i, 4), get_f!(tree, i, 5))),
+            Some(TreeNodeKind::ShapeRhombus                   ) => sample[depth] = shape::rhombus(points[depth], get_v2!(tree, i,  0)),
+            Some(TreeNodeKind::ShapeTrapezoidIso              ) => sample[depth] = shape::trapezoid_iso(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeParallelogram             ) => sample[depth] = shape::parallelogram(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeTriangle                  ) => sample[depth] = shape::triangle(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeTrianglePnt               ) => sample[depth] = shape::triangle_pnt(points[depth], get_v2!(tree, i,  0), get_v2!(tree, i,  2), get_v2!(tree, i,  4)),
+            Some(TreeNodeKind::ShapeTriangleIsosceles         ) => sample[depth] = shape::trapezoid_iso(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapeTriangleEquilateral       ) => sample[depth] = shape::triangle_equilateral(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeLineSegmentThick          ) => sample[depth] = shape::line_segment_thick(points[depth], get_v2!(tree, i,  0), get_v2!(tree, i,  2), get_f!(tree, i, 4)),
+            Some(TreeNodeKind::ShapeLineSegmentThin           ) => sample[depth] = shape::line_segment_thin(points[depth], get_v2!(tree, i,  0), get_v2!(tree, i,  2)),
+            Some(TreeNodeKind::ShapeParabola                  ) => sample[depth] = shape::parabola(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeParabolaSegment           ) => sample[depth] = shape::parabola_segment(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1)),
+            Some(TreeNodeKind::ShapeBezierSegment             ) => sample[depth] = shape::bezier_segment(points[depth], get_v2!(tree, i,  0), get_v2!(tree, i,  2), get_v2!(tree, i,  4)),
+            Some(TreeNodeKind::ShapePentagon                  ) => sample[depth] = shape::pentagon(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeHexagon                   ) => sample[depth] = shape::hexagon(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapeOctogon                   ) => sample[depth] = shape::octogon(points[depth], get_f!(tree, i, 0)),
+            Some(TreeNodeKind::ShapePolygonN                  ) => sample[depth] = shape::polygon_n(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1)),
+            Some(TreeNodeKind::ShapeStarN                     ) => sample[depth] = shape::polystar_n(points[depth], get_f!(tree, i, 0), get_f!(tree, i, 1), get_f!(tree, i, 2)),
+            Some(TreeNodeKind::ShapePolygonHull               ) => sample[depth] = shape::polygon_hull(points[depth], point_buf, tree[i] as usize, tree[i+1] as usize),
+            Some(TreeNodeKind::OperationUnaryNegate           ) => sample[depth] = operation::unary_negate(sample[depth]),
+            Some(TreeNodeKind::OperationUnaryOffset           ) => sample[depth] = operation::unary_offset(sample[depth], get_f!(tree, i, 0)),
+            Some(v @ TreeNodeKind::OperationBooleanUnion      ) |
+            Some(v @ TreeNodeKind::OperationBooleanIntersect  ) |
+            Some(v @ TreeNodeKind::OperationBooleanDifference ) |
+            Some(v @ TreeNodeKind::OperationBooleanInterpolate) => {
+                ops[depth]      = v;
+                index[depth+1]  = tree[i] as usize;
+                ends[depth+1]   = index[depth+1] + (tree[i+1]*8) as usize;
+                sample[depth+1] = core::f32::INFINITY;
+                depth += 1;
+                continue; // No increment!
+            },
+            None => unreachable!(),
+        }
+
+        index[depth] += 8;
+        if index[depth] > ends[depth] {
+            if depth > 0 {
+                sample[depth-1] = match ops[depth-1] {
+                    TreeNodeKind::OperationBooleanUnion       => operation::boolean_union(sample[depth-1], sample[depth]),
+                    TreeNodeKind::OperationBooleanIntersect   => operation::boolean_intersect(sample[depth-1], sample[depth]),
+                    TreeNodeKind::OperationBooleanDifference  => operation::boolean_difference(sample[depth-1], sample[depth]),
+                    TreeNodeKind::OperationBooleanInterpolate => operation::boolean_interpolate(sample[depth-1], sample[depth], get_f!(tree, index[depth-1], 2)),
+                    _ => unreachable!(),
+                };
+                depth -= 1;
+                index[depth] += 8;
+            } else {
+                break;
+            }
         }
     }
-    result
+
+    sample[0]
 }

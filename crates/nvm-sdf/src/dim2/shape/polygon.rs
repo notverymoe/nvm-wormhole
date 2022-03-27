@@ -21,6 +21,8 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.              **
 **==============================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
 use glam::{Vec2, vec2, BVec3};
 
 use crate::dim2::angle_to_vec;
@@ -85,11 +87,11 @@ pub fn polystar_n(p: Vec2, r: f32, n: f32, m: f32) -> f32 {
 }
 
 
-pub fn polygon_hull(p: Vec2, v: &[Vec2]) -> f32 {
+pub fn polygon_hull(p: Vec2, v: &[Vec2], start: usize, len: usize) -> f32 {
     let mut d = (p-v[0]).length_squared();
     let mut s = 1.0;
-    let mut j = v.len() - 1;
-    for i in 0..v.len() {
+    let mut j = len - 1;
+    for i in start..(start+len) {
         let e = v[j] - v[i];
         let w =    p - v[i];
         let b = w - e*(w.dot(e)/e.length_squared()).clamp(0.0, 1.0);

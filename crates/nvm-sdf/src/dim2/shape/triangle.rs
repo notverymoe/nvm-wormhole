@@ -21,6 +21,8 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.              **
 **==============================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
 use glam::{Vec2, vec2};
 
 use crate::dim2::SQRT_3;

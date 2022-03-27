@@ -2,6 +2,8 @@
 ** NotVeryMoe DSF | Copyright 2021 NotVeryMoe (projects@notvery.moe) **
 \*===================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
 use glam::{Vec2, mat2, vec2};
 
 use crate::dim2::angle_to_vec;

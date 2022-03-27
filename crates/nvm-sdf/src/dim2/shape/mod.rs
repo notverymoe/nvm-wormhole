@@ -21,6 +21,9 @@
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.              **
 **==============================================================================*/
 
+#[allow(unused_imports)]
+use num_traits::Float;
+
 fn ndot(a: glam::Vec2, b: glam::Vec2) -> f32 {
     a.x*b.x - a.y*b.y
 }

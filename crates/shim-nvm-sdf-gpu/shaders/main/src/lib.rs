@@ -1,35 +1,28 @@
 #![cfg_attr(
     target_arch = "spirv",
-    no_std,
     feature(register_attr),
-    register_attr(spirv)
+    register_attr(spirv),
+    no_std
 )]
 
 #[cfg(not(target_arch = "spirv"))]
 use spirv_std::macros::spirv;
 
 use core::panic::PanicInfo;
-use glam::Vec4;
+use glam::{vec2, Vec2, UVec3};
+use nvm_sdf::dim2::tree::evaluate_tree;
 
-#[spirv(fragment)]
-pub fn main_fs(output: &mut Vec4) {
-    *output = Vec4::new(1.0, 0.0, 0.0, 1.0);
-}
-
-#[spirv(vertex)]
+#[spirv(compute(threads(64)))]
 pub fn main_vs(
-    #[spirv(vertex_index)] vert_id: i32,
-    #[spirv(position, invariant)] out_pos: &mut Vec4,
+    #[spirv(global_invocation_id)] id: UVec3,
+    #[spirv(storage_buffer, descriptor_set = 0, binding = 0)] tmp: &[u32],
+    #[spirv(storage_buffer, descriptor_set = 1, binding = 1)] tmp2: &[Vec2],
+    #[spirv(storage_buffer, descriptor_set = 2, binding = 2)] out: &mut [f32],
 ) {
-    *out_pos = Vec4::new(
-        (vert_id - 1) as f32,
-        ((vert_id & 1) * 2 - 1) as f32,
-        0.0,
-        1.0,
-    );
+    out[id.x as usize] = evaluate_tree::<8>(tmp, tmp2, 0, 8, vec2(0.0,0.0));
 }
 
 #[panic_handler]
-fn a(info: &PanicInfo) -> ! {
+fn a(_: &PanicInfo) -> ! {
     loop {}
 }
